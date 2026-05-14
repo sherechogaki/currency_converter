@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1a56db">
+  <title>FXConvert</title>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('fxc_theme') || 'light';</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div><h1>FXConvert</h1><p>Canlı döviz kurları</p></div>
+    <button id="themeToggle" class="icon-btn" type="button" aria-label="Koyu modu değiştir">☾</button>
+  </header>
+  <main class="container-fluid app-shell">
+    <section id="installBanner" class="install-banner d-none" aria-live="polite"></section>
+    <section id="alertBanner" class="alert alert-info d-none" role="alert"></section>
+    <div class="shortcut-bar" aria-label="Para birimi kısayolları">
+      <button class="btn btn-sm btn-outline-primary" data-shortcut="USD">USD</button>
+      <button class="btn btn-sm btn-outline-primary" data-shortcut="EUR">EUR</button>
+      <button class="btn btn-sm btn-outline-primary" data-shortcut="GBP">GBP</button>
+      <button class="btn btn-sm btn-outline-primary" data-shortcut="JPY">JPY</button>
+      <button class="btn btn-sm btn-outline-primary" data-shortcut="TRY">TRY</button>
+      <button class="btn btn-sm btn-outline-primary" data-shortcut="CHF">CHF</button>
+      <button class="btn btn-sm btn-crypto" data-shortcut="BTC">BTC</button>
+      <button class="btn btn-sm btn-crypto" data-shortcut="ETH">ETH</button>
+    </div>
+    <div class="main-grid">
+      <section class="card converter-card"><div class="card-body">
+        <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+          <div><h2 class="section-title">Dönüştürücü</h2><p class="muted mb-0">Ücretler, uyarılar ve geçmiş ile orta piyasa kurları.</p></div>
+          <button id="favouriteBtn" class="favourite-star" type="button" aria-label="Favorilere ekle">☆</button>
+        </div>
+        <label for="amountInput" class="form-label">Tutar</label>
+        <input id="amountInput" class="form-control form-control-lg" type="number" min="0" step="any" placeholder="Tutar girin">
+        <div class="currency-row">
+          <div><label for="fromCurrency" class="form-label">Kaynak</label><select id="fromCurrency" class="form-select"></select></div>
+          <button id="swapBtn" class="swap-btn" type="button" aria-label="Para birimlerini değiştir">⇄</button>
+          <div><label for="toCurrency" class="form-label">Hedef</label><select id="toCurrency" class="form-select"></select></div>
+        </div>
+        <button id="feeToggle" class="link-button" type="button">Banka / kart ücretini göster</button>
+        <div id="feeRow" class="fee-row" aria-hidden="true"><label for="feeInput" class="form-label">Banka / kart ücreti (%)</label><input id="feeInput" class="form-control" type="number" min="0" max="20" step="0.1" value="0"></div>
+        <button id="convertBtn" class="btn btn-primary btn-lg w-100 mt-3" type="button"><span id="convertSpinner" class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span><span id="convertText">Dönüştür</span></button>
+        <div id="resultBox" class="result-box mt-4" aria-live="polite">
+          <div class="rate-label" id="rateLabel">Para birimlerini seçin ve tutar girin.</div>
+          <input id="resultInput" class="result-input" type="number" step="any" readonly aria-label="Dönüştürülen sonuç">
+          <div id="feeSummary" class="fee-summary"></div>
+          <button id="reverseToggle" class="link-button compact" type="button">Sonuç alanına yaz</button>
+          <div id="lastUpdated" class="last-updated"></div>
+        </div>
+        <div class="action-row"><button id="shareBtn" class="btn btn-outline-secondary" type="button">Paylaş</button></div>
+        <div id="favouritesList" class="favourites-list" aria-label="Favori pariteler"></div>
+      </div></section>
+    </div>
+    <section class="comparison-table panel"><div class="panel-head"><h2 class="section-title">Karşılaştırma</h2><input id="comparisonSearch" class="form-control form-control-sm" type="search" placeholder="Para birimi filtrele" aria-label="Karşılaştırma para birimlerini filtrele"></div><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Bayrak</th><th><button class="table-sort" data-sort="code">Kod</button></th><th><button class="table-sort" data-sort="name">Ad</button></th><th class="text-end"><button class="table-sort" data-sort="amount">Dönüştürülen tutar</button></th></tr></thead><tbody id="comparisonBody"><tr><td colspan="4" class="text-center muted">Para birimlerini karşılaştırmak için dönüşüm yapın.</td></tr></tbody></table></div></section>
+    <section class="panel"><div class="panel-head"><h2 class="section-title">Kur Uyarıları</h2></div><form id="alertForm" class="alert-form"><select id="alertFrom" class="form-select" aria-label="Uyarı kaynak para birimi"></select><select id="alertTo" class="form-select" aria-label="Uyarı hedef para birimi"></select><input id="alertTarget" class="form-control" type="number" step="any" min="0" placeholder="Hedef kur" aria-label="Hedef kur"><select id="alertDirection" class="form-select" aria-label="Uyarı yönü"><option value="above">Üstüne çıkınca</option><option value="below">Altına inince</option></select><button class="btn btn-outline-primary" type="submit">Uyarı Ekle</button></form><div id="alertsList" class="stack-list"></div></section>
+    <section class="panel history-panel"><div class="panel-head"><h2 class="section-title">Geçmiş</h2><button id="clearHistoryBtn" class="btn btn-sm btn-outline-danger" type="button">Geçmişi temizle</button></div><div id="historyList" class="stack-list"></div></section>
+  </main>
+  <footer class="app-footer"><span><a href="https://www.exchangerate-api.com/" rel="noreferrer">ExchangeRate-API</a>, <a href="https://www.frankfurter.app/" rel="noreferrer">Frankfurter</a> ve <a href="https://www.coingecko.com/" rel="noreferrer">CoinGecko</a> tarafından desteklenir.</span><span>Kısayollar: Enter Dönüştür · S Değiştir · D Koyu mod · F Ücret · Escape Kapat</span></footer>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3"><div id="appToast" class="toast" role="status" aria-live="polite" aria-atomic="true"><div id="toastBody" class="toast-body">Tamamlandı</div></div></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
